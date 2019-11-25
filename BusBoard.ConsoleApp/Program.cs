@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using RestSharp;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace BusBoard.ConsoleApp
 {
     class Program
     {
         public static object JSON { get; private set; }
-
         static void Main(string[] args)
 
         {
@@ -22,7 +22,6 @@ namespace BusBoard.ConsoleApp
                 ServicePointManager.Expect100Continue = true;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-
                 {
                     var tflClient = new RestClient("https://api.tfl.gov.uk");
                     var arrivalsRequest = new RestRequest("/StopPoint/490008660N/Arrivals", Method.GET) { RequestFormat = DataFormat.Json };
@@ -30,16 +29,16 @@ namespace BusBoard.ConsoleApp
                     string arrivalsContent = arrivalsResponse.Content;
 
                     List<Bus_Class> busList = JsonConvert.DeserializeObject<List<Bus_Class>>(arrivalsContent);
+                    List<Bus_Class> sortedBusList = busList.OrderBy(o => o.timeToStation).ToList();
 
                     //Regex UserInput = new Regex(@"List\s\b(?<firstname>)");
-                    busList.Sort();
+                  
                     if (userInput == "490008660N")
                     {
-                        foreach (var bus in busList)
+                        foreach (var bus in sortedBusList)
                         {
                             Console.WriteLine($"{bus.id} + {bus.destinationName} + {bus.timeToStation}");
-                        }
-                            
+                        }                           
                     }
                     else
                     {
