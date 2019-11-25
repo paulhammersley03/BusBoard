@@ -5,44 +5,44 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RestSharp;
+using Newtonsoft.Json;
 
 namespace BusBoard.ConsoleApp
 {
     class Program
     {
+        public static object JSON { get; private set; }
+
         static void Main(string[] args)
         { Console.WriteLine("Where do you want to travel from?");
-            Console.ReadLine();
+          Console.ReadLine();
 
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+          ServicePointManager.Expect100Continue = true;
+          ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
 
             {
-                //Have a look through the basic documentation of RestSharp on-line, and work out how to call the TfL API from your code.
-                //You will need to read the result, convert it into some sort of object, and then display the buses.
+                var tflClient = new RestClient("https://api.tfl.gov.uk");
+                var arrivalsRequest = new RestRequest("/StopPoint/490008660N/Arrivals", Method.GET) { RequestFormat = DataFormat.Json };
+                IRestResponse arrivalsResponse = tflClient.Execute(arrivalsRequest);
+                string arrivalsContent = arrivalsResponse.Content;
 
-                //Unless you're using .NET 4.6 or higher, you will need to add this to the top of your Main method 
-                //(to enable TLS 1.2 for HTTPS security - this is required by TfL but not enabled by default under older versions of .NET):
-                //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                List<Bus_Class> busList = JsonConvert.DeserializeObject<List<Bus_Class>>(arrivalsContent);
+                //Bus_Class Bus_Class = JsonConvert.DeserializeObject<Bus_Class>(arrivalsContent);
 
+                foreach (var bus in busList)
+                {
+                    Console.WriteLine($"{bus.id} + {bus.destinationName} + {bus.timeToStation}");
+                }               
+                Console.ReadLine();
+               
                 //Make it so that your console application takes a bus stop code as an input, and prints out the next 5 buses at that stop.
 
                 //Try to ensure you're using a sensible class structure with well-named methods. Remember to commit and push your changes as you go.
 
-                var client = new RestClient("https://api.tfl.gov.uk");
-                var request = new RestRequest("/StopPoint/490008660N/Arrivals", Method.GET) { RequestFormat = DataFormat.Json };
-                IRestResponse response = client.Execute(request);
-                var content = response.Content;
-                Console.WriteLine(response.Content);
-                Console.ReadLine();
 
-                //var response = _client.Execute<List<ServerDataModel>>(request);
 
-                //if (response.Data == null)
-                //throw new Exception(response.ErrorMessage);
-
-                //Console.WriteLine( response.Data);
+                
             }
             
         }   
