@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,9 @@ namespace BusBoard.ConsoleApp
         static void Main(string[] args)
         { Console.WriteLine("Where do you want to travel from?");
             Console.ReadLine();
+
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
 
             {
