@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Net;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RestSharp;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace BusBoard.ConsoleApp
 {
@@ -14,37 +12,46 @@ namespace BusBoard.ConsoleApp
         public static object JSON { get; private set; }
 
         static void Main(string[] args)
-        { Console.WriteLine("Where do you want to travel from?");
-          Console.ReadLine();
 
-          ServicePointManager.Expect100Continue = true;
-          ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-
+        {
+            while (true)
             {
-                var tflClient = new RestClient("https://api.tfl.gov.uk");
-                var arrivalsRequest = new RestRequest("/StopPoint/490008660N/Arrivals", Method.GET) { RequestFormat = DataFormat.Json };
-                IRestResponse arrivalsResponse = tflClient.Execute(arrivalsRequest);
-                string arrivalsContent = arrivalsResponse.Content;
+                Console.WriteLine("Please enter stop code");
+                string userInput = Console.ReadLine();
 
-                List<Bus_Class> busList = JsonConvert.DeserializeObject<List<Bus_Class>>(arrivalsContent);
-                //Bus_Class Bus_Class = JsonConvert.DeserializeObject<Bus_Class>(arrivalsContent);
+                ServicePointManager.Expect100Continue = true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-                foreach (var bus in busList)
+
                 {
-                    Console.WriteLine($"{bus.id} + {bus.destinationName} + {bus.timeToStation}");
-                }               
-                Console.ReadLine();
-               
-                //Make it so that your console application takes a bus stop code as an input, and prints out the next 5 buses at that stop.
+                    var tflClient = new RestClient("https://api.tfl.gov.uk");
+                    var arrivalsRequest = new RestRequest("/StopPoint/490008660N/Arrivals", Method.GET) { RequestFormat = DataFormat.Json };
+                    IRestResponse arrivalsResponse = tflClient.Execute(arrivalsRequest);
+                    string arrivalsContent = arrivalsResponse.Content;
 
-                //Try to ensure you're using a sensible class structure with well-named methods. Remember to commit and push your changes as you go.
+                    List<Bus_Class> busList = JsonConvert.DeserializeObject<List<Bus_Class>>(arrivalsContent);
 
+                    //Regex UserInput = new Regex(@"List\s\b(?<firstname>)");
+                    busList.Sort();
+                    if (userInput == "490008660N")
+                    {
+                        foreach (var bus in busList)
+                        {
+                            Console.WriteLine($"{bus.id} + {bus.destinationName} + {bus.timeToStation}");
+                        }
+                            
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid Input");
+                    }
+                    Console.ReadLine();
 
+                    //Make it so that your console application takes a bus stop code as an input, and prints out the next 5 buses at that stop.
 
-                
-            }
-            
+                    //Try to ensure you're using a sensible class structure with well-named methods. Remember to commit and push your changes as you go.
+                }
+            }    
         }   
 
     }
