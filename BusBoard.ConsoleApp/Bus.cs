@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BusBoard.ConsoleApp
 {
-    public class Bus_Class
+    public class Bus
     {
         public string __invalid_name__type { get; set; }
         public string id { get; set; }
