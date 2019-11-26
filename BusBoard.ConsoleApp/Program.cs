@@ -35,7 +35,7 @@ namespace BusBoard.ConsoleApp
                   
                     if (userInput == "490008660N")
                     {
-                        foreach (var bus in sortedBusList)
+                        foreach (var bus in sortedBusList.Take(5))
                         {
                             Console.WriteLine($"{bus.id} + {bus.destinationName} + {bus.timeToStation}");
                         }                           
