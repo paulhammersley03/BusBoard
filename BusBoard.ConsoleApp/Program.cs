@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using RestSharp;
 using Newtonsoft.Json;
 using System.Linq;
+using BusBoard.Api;
 
 
 namespace BusBoard.ConsoleApp
@@ -12,41 +13,24 @@ namespace BusBoard.ConsoleApp
     {
         public static object JSON { get; private set; }
         static void Main(string[] args)
-
         {
-            while (true)
             {
-                //use input
+                //user input
                 Console.WriteLine("Please enter your postcode to see the next buses at the two nearest bus stops:");
-                string userInput = Console.ReadLine();
-                ServicePointManager.Expect100Continue = true;
+                string userInput = Console.ReadLine();              
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                {
-                    //pulls post code data from user input from postcodes API
-                    var postcodeClient = new RestClient("http://api.postcodes.io");
-                    var postcodeRequest = new RestRequest($"/postcodes/{userInput}", Method.GET) { RequestFormat = DataFormat.Json };
-                    IRestResponse postcodeResponse = postcodeClient.Execute(postcodeRequest);
-                    string postcodeContent = postcodeResponse.Content;
-                    PostCodeResult postcodeObject = JsonConvert.DeserializeObject<PostCodeResult>(postcodeContent);
+                {                    
+                    RestClient tflClient;
+                    List<StopPoint> stopPointList;
+                    APIClass.GetAPIData(userInput, out tflClient, out stopPointList);
 
-                    var tflClient = new RestClient("https://api.tfl.gov.uk");
-
-                    //pulls stop point(bus stop) data from tfl API
-                    var stopPointRequest = new RestRequest($"StopPoint?app_id=c14b5da6&app_key=5ad2ba32b5f80495e752142127f7384e&stopTypes=NaptanPublicBusCoachTram&radius=500&lat=" +
-                        $"{postcodeObject.result.latitude}&lon={postcodeObject.result.longitude}", Method.GET) { RequestFormat = DataFormat.Json };
-                    IRestResponse stopPointResponse = tflClient.Execute(stopPointRequest);
-                    string stopPointContent = stopPointResponse.Content;
-                    
-                    //Creates lists for Bus Stops
-                    StopPointResult stopPointObject = JsonConvert.DeserializeObject<StopPointResult>(stopPointContent);
-                    List<StopPoint> stopPointList = stopPointObject.stopPoints;
-                    
                     //Prints it all nicely
                     foreach (StopPoint busStop in stopPointList.Take(2))
                     {
                         //pulls arrivals data from tfl 
                         var arrivalsRequest = new RestRequest($"/StopPoint/{busStop.naptanId}/Arrivals?app_id=c14b5da6&app_key=5ad2ba32b5f80495e752142127f7384e",
-                            Method.GET) { RequestFormat = DataFormat.Json };
+                            Method.GET)
+                        { RequestFormat = DataFormat.Json };
                         IRestResponse arrivalsResponse = tflClient.Execute(arrivalsRequest);
                         string arrivalsContent = arrivalsResponse.Content;
 
@@ -61,9 +45,11 @@ namespace BusBoard.ConsoleApp
                             Console.WriteLine($"{bus.vehicleId} at {bus.expectedArrival}");
                         }
                     }
-                        Console.ReadLine();
-                    }
+                    Console.ReadLine();
                 }
             }
-        }
+            }
+
+       
+    }
     }

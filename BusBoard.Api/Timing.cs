@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BusBoard.ConsoleApp
+namespace BusBoard.Api
 {
-    class Timing
+    public class Timing
     {
         public string __invalid_name__type { get; set; }
         public string countdownServerAdjustment { get; set; }
