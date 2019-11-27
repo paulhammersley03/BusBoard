@@ -10,7 +10,8 @@ namespace BusBoard.ConsoleApp
     public class StopPointResult
     {
         public List<StopPoint> stopPoints { get; set; }
-    }   
+    }
+
     public class StopPoint
     {
         public string naptanId { get; set; }

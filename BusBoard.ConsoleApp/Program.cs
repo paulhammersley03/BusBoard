@@ -3,10 +3,8 @@ using System.Net;
 using System.Collections.Generic;
 using RestSharp;
 using Newtonsoft.Json;
-using System.Text.RegularExpressions;
 using System.Linq;
-using Newtonsoft.Json.Linq;
-using System.Collections;
+
 
 namespace BusBoard.ConsoleApp
 {
@@ -18,57 +16,54 @@ namespace BusBoard.ConsoleApp
         {
             while (true)
             {
+                //use input
                 Console.WriteLine("Please enter your postcode to see the next buses at the two nearest bus stops:");
                 string userInput = Console.ReadLine();
-                
-
                 ServicePointManager.Expect100Continue = true;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
                 {
+                    //pulls post code data from user input from postcodes API
                     var postcodeClient = new RestClient("http://api.postcodes.io");
                     var postcodeRequest = new RestRequest($"/postcodes/{userInput}", Method.GET) { RequestFormat = DataFormat.Json };
                     IRestResponse postcodeResponse = postcodeClient.Execute(postcodeRequest);
                     string postcodeContent = postcodeResponse.Content;
-
-
                     PostCodeResult postcodeObject = JsonConvert.DeserializeObject<PostCodeResult>(postcodeContent);
 
                     var tflClient = new RestClient("https://api.tfl.gov.uk");
 
-                    var arrivalsRequest = new RestRequest("/StopPoint/490008660N/Arrivals", Method.GET) { RequestFormat = DataFormat.Json };
-
-                    var stopPointRequest = new RestRequest($"StopPoint?stopTypes=NaptanOnstreetBusCoachStopPair&radius=500&lat={postcodeObject.result.latitude}&lon={postcodeObject.result.longitude}", Method.GET) { RequestFormat = DataFormat.Json };
-
-                    IRestResponse arrivalsResponse = tflClient.Execute(arrivalsRequest);
-                    IRestResponse stopPointResponse = tflClient.Execute(stopPointRequest);//**
-                    string arrivalsContent = arrivalsResponse.Content;
-                    string stopPointContent = stopPointResponse.Content;//**
-
-                    List<Bus> busList = JsonConvert.DeserializeObject<List<Bus>>(arrivalsContent);
-                    List<Bus> sortedBusList = busList.OrderBy(o => o.timeToStation).ToList();
-
+                    //pulls stop point(bus stop) data from tfl API
+                    var stopPointRequest = new RestRequest($"StopPoint?app_id=c14b5da6&app_key=5ad2ba32b5f80495e752142127f7384e&stopTypes=NaptanPublicBusCoachTram&radius=500&lat=" +
+                        $"{postcodeObject.result.latitude}&lon={postcodeObject.result.longitude}", Method.GET) { RequestFormat = DataFormat.Json };
+                    IRestResponse stopPointResponse = tflClient.Execute(stopPointRequest);
+                    string stopPointContent = stopPointResponse.Content;
+                    
+                    //Creates lists for Bus Stops
                     StopPointResult stopPointObject = JsonConvert.DeserializeObject<StopPointResult>(stopPointContent);
-                    //PostCode postcodeObject = JsonConvert.DeserializeObject<PostCode>(postcodeContent);
-
-                    //var StopPoint.StopPointResults = new StopPoint(); 
-
-                    //int stopPointObjectLength = stopPointObject.;
-
                     List<StopPoint> stopPointList = stopPointObject.stopPoints;
-
-
-
+                    
+                    //Prints it all nicely
                     foreach (StopPoint busStop in stopPointList.Take(2))
+                    {
+                        //pulls arrivals data from tfl 
+                        var arrivalsRequest = new RestRequest($"/StopPoint/{busStop.naptanId}/Arrivals?app_id=c14b5da6&app_key=5ad2ba32b5f80495e752142127f7384e",
+                            Method.GET) { RequestFormat = DataFormat.Json };
+                        IRestResponse arrivalsResponse = tflClient.Execute(arrivalsRequest);
+                        string arrivalsContent = arrivalsResponse.Content;
 
-                        foreach (var bus in sortedBusList)
-                            {
-                                Console.WriteLine($"The next buses at {busStop.commonName} are: {bus.vehicleId} at {bus.expectedArrival}");
-                            }
+                        //Creates lists for Arrivals
+                        List<Arrivals> arrivalsList = JsonConvert.DeserializeObject<List<Arrivals>>(arrivalsContent);
+                        List<Arrivals> sortedArrivalsList = arrivalsList.OrderBy(o => o.timeToStation).ToList();
 
-                    Console.ReadLine();
+                        Console.WriteLine($"The next buses at {busStop.commonName} are:");
+
+                        foreach (var bus in sortedArrivalsList)
+                        {
+                            Console.WriteLine($"{bus.vehicleId} at {bus.expectedArrival}");
+                        }
+                    }
+                        Console.ReadLine();
+                    }
                 }
-            }    
-        }   
-    }   
-}
+            }
+        }
+    }

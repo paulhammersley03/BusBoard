@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace BusBoard.ConsoleApp
 {
-    public class Bus
+    public class Arrivals
     {
-        public string __invalid_name__type { get; set; }
+        //public string __invalid_name__type { get; set; }
         public string id { get; set; }
         public int operationType { get; set; }
         public string vehicleId { get; set; }
