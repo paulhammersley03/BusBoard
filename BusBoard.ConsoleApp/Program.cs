@@ -59,12 +59,12 @@ namespace BusBoard.ConsoleApp
 
 
 
-
-
                     foreach (StopPoint busStop in stopPointList.Take(2))
-                    {
-                        Console.WriteLine($"The next buses at {busStop.commonName} are:");
-                    }
+
+                        foreach (var bus in sortedBusList)
+                            {
+                                Console.WriteLine($"The next buses at {busStop.commonName} are: {bus.vehicleId} at {bus.expectedArrival}");
+                            }
 
                     Console.ReadLine();
                 }
