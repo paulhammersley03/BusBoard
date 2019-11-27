@@ -35,12 +35,15 @@ namespace BusBoard.ConsoleApp
                     PostCodeResult postcodeObject = JsonConvert.DeserializeObject<PostCodeResult>(postcodeContent);
 
                     var tflClient = new RestClient("https://api.tfl.gov.uk");
+
                     var arrivalsRequest = new RestRequest("/StopPoint/490008660N/Arrivals", Method.GET) { RequestFormat = DataFormat.Json };
-                    var stopPointRequest = new RestRequest($"StopPoint?stopTypes=NaptanOnstreetBusCoachStopPair&radius=200&lat={postcodeObject.result.latitude}&lon={postcodeObject.result.longitude}", Method.GET) { RequestFormat = DataFormat.Json };
+
+                    var stopPointRequest = new RestRequest($"StopPoint?stopTypes=NaptanOnstreetBusCoachStopPair&radius=500&lat={postcodeObject.result.latitude}&lon={postcodeObject.result.longitude}", Method.GET) { RequestFormat = DataFormat.Json };
+
                     IRestResponse arrivalsResponse = tflClient.Execute(arrivalsRequest);
-                    IRestResponse stopPointResponse = tflClient.Execute(stopPointRequest);
+                    IRestResponse stopPointResponse = tflClient.Execute(stopPointRequest);//**
                     string arrivalsContent = arrivalsResponse.Content;
-                    string stopPointContent = stopPointResponse.Content;
+                    string stopPointContent = stopPointResponse.Content;//**
 
                     List<Bus> busList = JsonConvert.DeserializeObject<List<Bus>>(arrivalsContent);
                     List<Bus> sortedBusList = busList.OrderBy(o => o.timeToStation).ToList();
@@ -48,11 +51,20 @@ namespace BusBoard.ConsoleApp
                     StopPointResult stopPointObject = JsonConvert.DeserializeObject<StopPointResult>(stopPointContent);
                     //PostCode postcodeObject = JsonConvert.DeserializeObject<PostCode>(postcodeContent);
 
-                  //var StopPoint.StopPointResults = new StopPoint(); 
+                    //var StopPoint.StopPointResults = new StopPoint(); 
+
+                    //int stopPointObjectLength = stopPointObject.;
+
+                    List<StopPoint> stopPointList = stopPointObject.stopPoints;
 
 
 
-                    Console.WriteLine($"{stopPointObject.stopPoints}");
+
+
+                    foreach (StopPoint busStop in stopPointList.Take(2))
+                    {
+                        Console.WriteLine($"The next buses at {busStop.commonName} are:");
+                    }
 
                     Console.ReadLine();
                 }

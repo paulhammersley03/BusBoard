@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace BusBoard.ConsoleApp
 {
-    
+
     public class StopPointResult
-    {        
+    {
         public List<StopPoint> stopPoints { get; set; }
     }   
     public class StopPoint
