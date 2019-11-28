@@ -7,4 +7,20 @@
 
 <div class="row">
     <p>You entered postcode @Model.PostCode</p>
+    <br />
+    <p>The nearest Bus stop is: @Model.BusStop1.commonName</p>
+    <ul>
+        @foreach (var bus in Model.Arrivals1)
+        {
+            <li>Line @bus.destinationName in @bus.timeToStation seconds</li>
+        }
+    </ul>
+    <br />
+    <p>The nearest Bus stop is: @Model.BusStop2.commonName</p>
+    <ul>
+        @foreach (var bus in Model.Arrivals2)
+        {
+            <li>Line @bus.destinationName in @bus.timeToStation seconds</li>
+        }
+    </ul>
 </div>
